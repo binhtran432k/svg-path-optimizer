@@ -1,0 +1,6 @@
+# top-most EditorConfig file
+root = true
+
+[*.{ts,js,json}]
+indent_style = tab
+indent_size = 2

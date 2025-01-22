@@ -1,0 +1,12 @@
+{
+	"name": "svg-path-optimizer",
+	"module": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"lint": "biome check",
+		"lint:fix": "biome check --unsafe --write"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	}
+}

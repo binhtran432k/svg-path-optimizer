@@ -1,0 +1,4 @@
+{
+	"extends": ["./tsconfig.share.jsonc"],
+	"include": ["src"]
+}
