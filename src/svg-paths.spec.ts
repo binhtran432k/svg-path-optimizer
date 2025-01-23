@@ -165,4 +165,12 @@ describe("toPathText()", () => {
 			}),
 		).toBe("M1.2.1.3.4");
 	});
+	test("can convert arc to", () => {
+		expect(
+			toPathText({
+				cmds: "A",
+				valuesList: [1, 2, 3, 0, 0, 6, 7],
+			}),
+		).toBe("A1 2 3 006 7");
+	});
 });

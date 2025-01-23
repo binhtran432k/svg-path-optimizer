@@ -54,7 +54,7 @@ export function toPathText(svgPaths: SvgPaths): string {
 			const isNearZero = -1 < v && v < 1 && v !== 0;
 			if (i === 3 && upperCmd === "A") {
 				const flag2V = svgPaths.valuesList[idx + i + 1];
-				rt += `${v}${flag2V}`;
+				rt += ` ${v}${flag2V}`;
 				const postFlagV = svgPaths.valuesList[idx + i + 2];
 				const isPostFlagNearZero =
 					-1 < postFlagV && postFlagV < 1 && postFlagV !== 0;
