@@ -36,6 +36,53 @@ export function createSvgPaths(pathText: string): SvgPaths {
 	};
 }
 
+export function toPathText(svgPaths: SvgPaths): string {
+	let rt = "";
+	let idx = 0;
+	let preCmd = "0";
+	let preIsFloating = false;
+	for (const cmd of svgPaths.cmds) {
+		if (cmd !== preCmd) {
+			rt += cmd;
+		}
+		const upperCmd = cmd.toUpperCase();
+		// biome-ignore lint/style/noNonNullAssertion: cmd is valid from SvgPaths by default
+		const size = SvgPathSizeMap.get(upperCmd)!;
+		for (let i = 0; i < size; i++) {
+			const v = svgPaths.valuesList[idx + i];
+			const isFirstCmdGroupIdx = i === 0 && preCmd !== cmd;
+			const isNearZero = -1 < v && v < 1 && v !== 0;
+			if (i === 3 && !isNearZero && upperCmd === "A") {
+				const flag2V = svgPaths.valuesList[idx + i + 1];
+				rt += `${v}${flag2V}`;
+				const postFlagV = svgPaths.valuesList[idx + i + 2];
+				const isPostFlagNearZero =
+					-1 < postFlagV && postFlagV < 1 && postFlagV !== 0;
+				if (isPostFlagNearZero) {
+					rt += postFlagV.toString().replace("0.", ".");
+				} else {
+					rt += postFlagV.toString();
+				}
+				i += 2;
+				preIsFloating = Math.trunc(postFlagV) !== postFlagV;
+				continue;
+			}
+			if (isNearZero) {
+				if (!preIsFloating && !isFirstCmdGroupIdx) rt += " ";
+				rt += v.toString().replace("0.", ".");
+			} else if (v < 0 || isFirstCmdGroupIdx) {
+				rt += v.toString();
+			} else {
+				rt += ` ${v.toString()}`;
+			}
+			preIsFloating = Math.trunc(v) !== v;
+		}
+		idx += size;
+		preCmd = cmd;
+	}
+	return rt;
+}
+
 function splitPathText(pathText: string): string[] {
 	return pathText
 		.trim()

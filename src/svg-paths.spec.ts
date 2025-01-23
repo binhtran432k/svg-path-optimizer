@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createSvgPaths } from "./svg-paths";
+import { createSvgPaths, toPathText } from "./svg-paths";
 
 describe("createSvgPaths()", () => {
 	test("can create", () => {
@@ -117,5 +117,52 @@ describe("createSvgPaths()", () => {
 			cmds: "A",
 			valuesList: [45, 45, 0, 0, 0, 215, 125],
 		});
+	});
+});
+
+describe("toPathText()", () => {
+	test("can convert", () => {
+		expect(
+			toPathText({
+				cmds: "M",
+				valuesList: [0, 0],
+			}),
+		).toBe("M0 0");
+	});
+	test("can convert negative", () => {
+		expect(
+			toPathText({
+				cmds: "M",
+				valuesList: [0, -1],
+			}),
+		).toBe("M0-1");
+	});
+	test("can convert floating", () => {
+		expect(
+			toPathText({
+				cmds: "M",
+				valuesList: [1, 0.1],
+			}),
+		).toBe("M1 .1");
+		expect(
+			toPathText({
+				cmds: "M",
+				valuesList: [0.1, 0.1],
+			}),
+		).toBe("M.1.1");
+		expect(
+			toPathText({
+				cmds: "M",
+				valuesList: [0.2, 1.1],
+			}),
+		).toBe("M.2 1.1");
+	});
+	test("can convert command group", () => {
+		expect(
+			toPathText({
+				cmds: "MM",
+				valuesList: [1.2, 0.1, 0.3, 0.4],
+			}),
+		).toBe("M1.2.1.3.4");
 	});
 });
