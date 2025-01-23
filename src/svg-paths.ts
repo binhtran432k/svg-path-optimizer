@@ -1,6 +1,6 @@
 export interface SvgPaths {
 	cmds: string;
-	valuesList: number[];
+	values: number[];
 }
 
 const SvgPathSizeMap: Map<string, number> = new Map(
@@ -32,7 +32,7 @@ export function createSvgPaths(pathText: string): SvgPaths {
 	const pathItems = splitPathText(pathText).flatMap(parsePathItems);
 	return {
 		cmds: pathItems.flatMap(([cmd]) => cmd).join(""),
-		valuesList: pathItems.flatMap(([, values]) => values),
+		values: pathItems.flatMap(([, values]) => values),
 	};
 }
 
@@ -49,13 +49,13 @@ export function toPathText(svgPaths: SvgPaths): string {
 		// biome-ignore lint/style/noNonNullAssertion: cmd is valid from SvgPaths by default
 		const size = SvgPathSizeMap.get(upperCmd)!;
 		for (let i = 0; i < size; i++) {
-			const v = svgPaths.valuesList[idx + i];
+			const v = svgPaths.values[idx + i];
 			const isFirstCmdGroupIdx = i === 0 && preCmd !== cmd;
 			const isNearZero = -1 < v && v < 1 && v !== 0;
 			if (i === 3 && upperCmd === "A") {
-				const flag2V = svgPaths.valuesList[idx + i + 1];
+				const flag2V = svgPaths.values[idx + i + 1];
 				rt += ` ${v}${flag2V}`;
-				const postFlagV = svgPaths.valuesList[idx + i + 2];
+				const postFlagV = svgPaths.values[idx + i + 2];
 				const isPostFlagNearZero =
 					-1 < postFlagV && postFlagV < 1 && postFlagV !== 0;
 				if (isPostFlagNearZero) {
