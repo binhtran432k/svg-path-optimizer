@@ -1,9 +1,9 @@
-export interface SvgPaths {
-	cmds: string;
+export interface PathItem {
+	cmd: string;
 	values: number[];
 }
 
-export const SvgPathSizeMap: Map<string, number> = new Map(
+const SvgPathSizeMap: Map<string, number> = new Map(
 	Object.entries({
 		/** Move To */
 		M: 2,
@@ -28,20 +28,15 @@ export const SvgPathSizeMap: Map<string, number> = new Map(
 	}),
 );
 
-export function createSvgPaths(pathText: string): SvgPaths {
-	const pathItems = splitPathText(pathText).flatMap(parsePathItems);
-	return {
-		cmds: pathItems.flatMap(([cmd]) => cmd).join(""),
-		values: pathItems.flatMap(([, values]) => values),
-	};
+export function createPathItems(pathText: string): PathItem[] {
+	return splitPathText(pathText).flatMap(parsePathItems);
 }
 
-export function toPathText(svgPaths: SvgPaths): string {
+export function toPathTextFromPathItems(items: PathItem[]): string {
 	let rt = "";
-	let idx = 0;
 	let preCmd = "0";
 	let preIsFloating = false;
-	for (const cmd of svgPaths.cmds) {
+	for (const { cmd, values } of items) {
 		if (cmd !== preCmd) {
 			rt += cmd;
 		}
@@ -49,13 +44,13 @@ export function toPathText(svgPaths: SvgPaths): string {
 		// biome-ignore lint/style/noNonNullAssertion: cmd is valid from SvgPaths by default
 		const size = SvgPathSizeMap.get(upperCmd)!;
 		for (let i = 0; i < size; i++) {
-			const v = svgPaths.values[idx + i];
+			const v = values[i];
 			const isFirstCmdGroupIdx = i === 0 && preCmd !== cmd;
 			const isNearZero = -1 < v && v < 1 && v !== 0;
 			if (i === 3 && upperCmd === "A") {
-				const flag2V = svgPaths.values[idx + i + 1];
+				const flag2V = values[i + 1];
 				rt += ` ${v}${flag2V}`;
-				const postFlagV = svgPaths.values[idx + i + 2];
+				const postFlagV = values[i + 2];
 				const isPostFlagNearZero =
 					-1 < postFlagV && postFlagV < 1 && postFlagV !== 0;
 				if (isPostFlagNearZero) {
@@ -77,7 +72,6 @@ export function toPathText(svgPaths: SvgPaths): string {
 			}
 			preIsFloating = Math.trunc(v) !== v;
 		}
-		idx += size;
 		preCmd = cmd;
 	}
 	return rt;
@@ -90,10 +84,8 @@ function splitPathText(pathText: string): string[] {
 		.filter(Boolean);
 }
 
-function parsePathItems(
-	pathItemsText: string,
-): [cmd: string, values: number[]][] {
-	const rt: [cmd: string, values: number[]][] = [];
+function parsePathItems(pathItemsText: string): PathItem[] {
+	const rt: PathItem[] = [];
 
 	const cmd = pathItemsText[0];
 	const upperCmd = cmd.toUpperCase();
@@ -110,40 +102,41 @@ function parsePathItems(
 	const count =
 		sizePerCmd === 0 ? 1 : Math.ceil(valueTexts.length / sizePerCmd);
 
-	for (let i = 0; i < count; i++) {
-		const valuePerCmdTexts: string[] = [];
-		for (let j = 0; j < sizePerCmd; j++) {
-			const vI = i * sizePerCmd + j;
-			if (j === 3 && upperCmd === "A") {
-				const flags: string[] = [];
-				const flagText = valueTexts.slice(vI, vI + 3).join(" ");
-
-				let flagCount = 0;
-				if ("01".includes(flagText[flagCount])) {
-					flags.push(flagText[flagCount++]);
-					if (flagText[flagCount] === " ") flagCount++;
-					if ("01".includes(flagText[flagCount])) {
-						flags.push(flagText[flagCount++]);
-					} else {
-						flags.push("0");
-					}
+	const allValueTexts: string[] = new Array(sizePerCmd * count);
+	for (let i = 0, vI = 0; i < allValueTexts.length; ) {
+		if (i % sizePerCmd === 3 && upperCmd === "A") {
+			const flagText = valueTexts.slice(vI, vI + 3).join(" ");
+			let flagI = 0;
+			if ("01".includes(flagText[flagI])) {
+				allValueTexts[i++] = flagText[flagI++];
+				if (flagText[flagI] === " ") flagI++;
+				if ("01".includes(flagText[flagI])) {
+					allValueTexts[i++] = flagText[flagI++];
 				} else {
-					flags.push("0");
-					flags.push("0");
+					allValueTexts[i++] = "0";
 				}
-				const remainFlagTexts = flagText
-					.slice(flagCount)
-					.split(" ")
-					.filter(Boolean);
-
-				valuePerCmdTexts.push(...flags, ...remainFlagTexts);
-				j += flags.length + remainFlagTexts.length - 1;
 			} else {
-				valuePerCmdTexts.push(valueTexts[vI] ?? "0");
+				allValueTexts[i++] = "0";
+				allValueTexts[i++] = "0";
 			}
+			for (const remainText of flagText
+				.slice(flagI)
+				.split(" ")
+				.filter(Boolean)) {
+				allValueTexts[i++] = remainText;
+			}
+			vI += 3;
+		} else {
+			allValueTexts[i++] = valueTexts[vI++] ?? "0";
 		}
-		rt.push([cmd, valuePerCmdTexts.slice(0, sizePerCmd).map(Number)]);
 	}
-
+	for (let i = 0; i < count; i++) {
+		rt.push({
+			cmd,
+			values: allValueTexts
+				.slice(sizePerCmd * i, sizePerCmd * (i + 1))
+				.map(Number),
+		});
+	}
 	return rt;
 }
