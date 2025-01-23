@@ -3,7 +3,7 @@ export interface SvgPaths {
 	values: number[];
 }
 
-const SvgPathSizeMap: Map<string, number> = new Map(
+export const SvgPathSizeMap: Map<string, number> = new Map(
 	Object.entries({
 		/** Move To */
 		M: 2,
