@@ -1,7 +1,7 @@
 import type { PathItem } from "./path-item.js";
 
-export function scaleItem(item: PathItem, ratio: number): PathItem {
-	const { upperCmd, values } = item;
+export function scaleItem(absItem: PathItem, ratio: number): PathItem {
+	const { upperCmd, values } = absItem;
 	switch (upperCmd) {
 		case "H":
 			values[0] *= ratio;
@@ -20,7 +20,7 @@ export function scaleItem(item: PathItem, ratio: number): PathItem {
 				values[i++] *= ratio;
 			}
 	}
-	return item;
+	return absItem;
 }
 
 function scaleArc(values: number[], kx: number, ky: number) {

@@ -24,12 +24,12 @@ export function optimize(input: string, opts?: Partial<OptimizeOpts>): string {
 	};
 
 	let items = createPathItems(input);
+	items = toAbsolute(items);
 	if (o.scaleRatio) {
 		for (const item of items) {
 			scaleItem(item, o.scaleRatio);
 		}
 	}
-	items = toAbsolute(items);
 	items = optimizeShorthands(items, o.tolerance);
 	items = optimizeLines(items, o.tolerance);
 	items = removeUselessItems(items, o.tolerance);
