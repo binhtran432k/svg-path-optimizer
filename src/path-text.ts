@@ -20,7 +20,7 @@ export function toPathText(items: PathItem[], fractionDigits?: number): string {
 export function toPathTextItem(
 	{ cmd, values, upperCmd }: PathItem,
 	state: PathTextState,
-	fractionDigits?: number,
+	fractionDigits = 4,
 ): string {
 	let rt = "";
 	const isInGroup = upperCmd !== "M" && cmd === state.preCmd;
@@ -53,13 +53,10 @@ export function toPathTextItem(
 		.replace(/(\.[0-9]+) (?=\.)/g, "$1");
 }
 
-function formatNumber(v: number, fractionDigits?: number): string {
-	const output =
-		fractionDigits === undefined
-			? v.toString()
-			: v
-					.toFixed(fractionDigits)
-					.replace(/^(-?[0-9]*\.([0-9]*[1-9])?)0*$/, "$1")
-					.replace(/\.$/, "");
-	return output.replace(/^(-?)0\./, "$1.");
+function formatNumber(v: number, fractionDigits: number): string {
+	return v
+		.toFixed(fractionDigits)
+		.replace(/^(-?[0-9]*\.([0-9]*[1-9])?)0*$/, "$1")
+		.replace(/\.$/, "")
+		.replace(/^(-?)0\./, "$1.");
 }

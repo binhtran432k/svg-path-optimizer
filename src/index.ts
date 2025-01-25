@@ -6,12 +6,14 @@ import { scaleItem } from "./scale.js";
 
 export interface OptimizeOpts {
 	scaleRatio?: number;
-	fractionDigits?: number;
+	/** @default 4 */
+	fractionDigits: number;
 	/** @default 0 */
 	tolerance: number;
 }
 
 const DEAFULT_OPTS: OptimizeOpts = {
+	fractionDigits: 4,
 	tolerance: 0,
 };
 
