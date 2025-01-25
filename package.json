@@ -1,12 +1,17 @@
 {
 	"name": "svg-path-optimizer",
-	"module": "src/index.ts",
+	"version": "0.0.0",
 	"type": "module",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": ["dist"],
 	"scripts": {
 		"lint": "biome check",
-		"lint:fix": "biome check --unsafe --write"
+		"lint:fix": "biome check --unsafe --write",
+		"gen": "bun scripts/gen.ts"
 	},
 	"devDependencies": {
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"oxc-transform": "^0.48.0"
 	}
 }
