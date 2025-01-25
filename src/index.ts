@@ -2,8 +2,10 @@ import { toAbsolute, toRelativeItem } from "./absolute.js";
 import { type PathItem, createPathItems } from "./path-item.js";
 import { type PathTextState, toPathText, toPathTextItem } from "./path-text.js";
 import { type PathPoint, toNextControlPoint, toNextPoint } from "./point.js";
+import { scaleItem } from "./scale.js";
 
 export interface OptimizeOpts {
+	scaleRatio?: number;
 	/** @default 0 */
 	tolerance: number;
 }
@@ -19,6 +21,11 @@ export function optimize(input: string, opts?: Partial<OptimizeOpts>): string {
 	};
 
 	let items = createPathItems(input);
+	if (o.scaleRatio) {
+		for (const item of items) {
+			scaleItem(item, o.scaleRatio);
+		}
+	}
 	items = toAbsolute(items);
 	items = optimizeShorthands(items, o.tolerance);
 	items = optimizeLines(items, o.tolerance);

@@ -46,4 +46,7 @@ describe("optimize()", () => {
 		expect(optimize("M1 2l-1-2")).toBe("M1 2L0 0");
 		expect(optimize("M1 2L10 10")).toBe("M1 2l9 8");
 	});
+	test("can optimize with scale", () => {
+		expect(optimize("M1 2", { scaleRatio: 2 })).toBe("M2 4");
+	});
 });
