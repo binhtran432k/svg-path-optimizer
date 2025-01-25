@@ -5,14 +5,14 @@ export interface PathTextState {
 	preIsFloating: boolean;
 }
 
-export function toPathText(items: PathItem[]): string {
+export function toPathText(items: PathItem[], fractionDigits?: number): string {
 	let rt = "";
 	const state: PathTextState = {
 		preCmd: "0",
 		preIsFloating: false,
 	};
 	for (const item of items) {
-		rt += toPathTextItem(item, state);
+		rt += toPathTextItem(item, state, fractionDigits);
 	}
 	return rt;
 }
@@ -20,41 +20,46 @@ export function toPathText(items: PathItem[]): string {
 export function toPathTextItem(
 	{ cmd, values, upperCmd }: PathItem,
 	state: PathTextState,
+	fractionDigits?: number,
 ): string {
 	let rt = "";
 	const isInGroup = upperCmd !== "M" && cmd === state.preCmd;
-	if (!isInGroup) {
+	const isLineAfterMove =
+		(cmd === "L" && state.preCmd === "M") ||
+		(cmd === "l" && state.preCmd === "m");
+	if (!isInGroup && !isLineAfterMove) {
 		rt += cmd;
 	}
 	for (let i = 0; i < values.length; i++) {
-		const v = values[i];
-		const isFirstCmdIdx = i === 0 && !isInGroup;
-		const isNearZero = -1 < v && v < 1 && v !== 0;
+		const v = formatNumber(values[i], fractionDigits);
+		const isNearZero = /^-?\./.test(v);
+		if (!isNearZero || !state.preIsFloating) {
+			rt += " ";
+		}
 		if (i === 3 && upperCmd === "A") {
-			const flag2V = values[i + 1];
-			rt += ` ${v}${flag2V}`;
-			const postFlagV = values[i + 2];
-			const isPostFlagNearZero =
-				-1 < postFlagV && postFlagV < 1 && postFlagV !== 0;
-			if (isPostFlagNearZero) {
-				rt += postFlagV.toString().replace("0.", ".");
-			} else {
-				rt += postFlagV.toString();
-			}
+			const postFlagV = formatNumber(values[i + 2], fractionDigits);
+			rt += `${v}${values[i + 1]}${postFlagV}`;
 			i += 2;
-			state.preIsFloating = Math.trunc(postFlagV) !== postFlagV;
+			state.preIsFloating = postFlagV.includes(".");
 			continue;
 		}
-		if (isNearZero) {
-			if (!state.preIsFloating && !isFirstCmdIdx) rt += " ";
-			rt += v.toString().replace("0.", ".");
-		} else if (v < 0 || isFirstCmdIdx) {
-			rt += v.toString();
-		} else {
-			rt += ` ${v.toString()}`;
-		}
-		state.preIsFloating = Math.trunc(v) !== v;
+		rt += v;
+		state.preIsFloating = v.includes(".");
 	}
 	state.preCmd = cmd;
-	return rt;
+	return rt
+		.replace(/^([a-z]) /i, "$1")
+		.replace(/ -/g, "-")
+		.replace(/(\.[0-9]+) (?=\.)/g, "$1");
+}
+
+function formatNumber(v: number, fractionDigits?: number): string {
+	const output =
+		fractionDigits === undefined
+			? v.toString()
+			: v
+					.toFixed(fractionDigits)
+					.replace(/^(-?[0-9]*\.([0-9]*[1-9])?)0*$/, "$1")
+					.replace(/\.$/, "");
+	return output.replace(/^(-?)0\./, "$1.");
 }

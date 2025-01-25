@@ -20,6 +20,10 @@ describe("toPathText()", () => {
 	test("can convert arc to", () => {
 		testPathText("A1 2 3 0 0 6 7", "A1 2 3 006 7");
 	});
+	test("can convert with fraction digits", () => {
+		expect(toPathText(createPathItems("M0.1 0.2"))).toBe("M.1.2");
+		expect(toPathText(createPathItems("M0.1 0.2"), 0)).toBe("M0 0");
+	});
 });
 
 function testPathText(text: string, expected: string) {

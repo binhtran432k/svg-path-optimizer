@@ -24,7 +24,7 @@ describe("optimize()", () => {
 		expect(optimize("L1 3", { tolerance: 1 })).toBe("V3");
 	});
 	test("can optimize useless items", () => {
-		expect(optimize("M0 0M2 3M1 3L2 1")).toBe("M1 3L2 1");
+		expect(optimize("M0 0M2 3M1 3L2 1")).toBe("M1 3 2 1");
 		expect(optimize("M1 3ZZZL2 1")).toBe("M1 3ZL2 1");
 		expect(optimize("L2 1 2 1")).toBe("L2 1");
 		expect(optimize("M3 0H3")).toBe("M3 0");
@@ -33,20 +33,19 @@ describe("optimize()", () => {
 		expect(optimize("M3 0H2")).toBe("M3 0H2");
 		expect(optimize("M3 0H2", { tolerance: 1 })).toBe("M3 0");
 	});
-	test("can optimize useless items", () => {
-		expect(optimize("M0 0M2 3M1 3L2 1")).toBe("M1 3L2 1");
-		expect(optimize("M1 3ZZZL2 1")).toBe("M1 3ZL2 1");
-		expect(optimize("L2 1 2 1")).toBe("L2 1");
-	});
 	test("can optimize trailing points", () => {
 		expect(optimize("L1 2M2 3")).toBe("L1 2");
 		expect(optimize("L1 2M2 3m4 5")).toBe("L1 2");
 	});
 	test("can optimize absolute or relative", () => {
-		expect(optimize("M1 2l-1-2")).toBe("M1 2L0 0");
+		expect(optimize("M1 2l-1-2")).toBe("M1 2 0 0");
 		expect(optimize("M1 2L10 10")).toBe("M1 2l9 8");
 	});
 	test("can optimize with scale", () => {
 		expect(optimize("M1 2", { scaleRatio: 2 })).toBe("M2 4");
+	});
+	test("can optimize with fraction digits", () => {
+		expect(optimize("M1.1 2.5")).toBe("M1.1 2.5");
+		expect(optimize("M1.1 2.5", { fractionDigits: 0 })).toBe("M1 3");
 	});
 });

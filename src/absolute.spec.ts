@@ -7,10 +7,10 @@ import type { PathPoint } from "./point.js";
 
 describe("toAbsolute()", () => {
 	test("can convert relative", () => {
-		testToAbsolute("M1 2l0 0", "M1 2L1 2");
+		testToAbsolute("M1 2l0 0", "M1 2 1 2");
 	});
 	test("ignore from absolute", () => {
-		testToAbsolute("M1 2L0 0", "M1 2L0 0");
+		testToAbsolute("M1 2L0 0", "M1 2 0 0");
 	});
 });
 

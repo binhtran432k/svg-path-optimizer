@@ -6,6 +6,7 @@ import { scaleItem } from "./scale.js";
 
 export interface OptimizeOpts {
 	scaleRatio?: number;
+	fractionDigits?: number;
 	/** @default 0 */
 	tolerance: number;
 }
@@ -31,8 +32,8 @@ export function optimize(input: string, opts?: Partial<OptimizeOpts>): string {
 	items = optimizeLines(items, o.tolerance);
 	items = removeUselessItems(items, o.tolerance);
 	items = trimTrailingPoint(items);
-	items = optimizeAbsoluteRelative(items);
-	return toPathText(items);
+	items = optimizeAbsoluteRelative(items, o.fractionDigits);
+	return toPathText(items, o.fractionDigits);
 }
 
 function optimizeShorthands(
@@ -145,7 +146,10 @@ function trimTrailingPoint(items: PathItem[]): PathItem[] {
 	return items;
 }
 
-function optimizeAbsoluteRelative(absItems: PathItem[]): PathItem[] {
+function optimizeAbsoluteRelative(
+	absItems: PathItem[],
+	fractionDigits?: number,
+): PathItem[] {
 	const state: PathTextState = {
 		preCmd: "0",
 		preIsFloating: false,
@@ -159,8 +163,8 @@ function optimizeAbsoluteRelative(absItems: PathItem[]): PathItem[] {
 			point,
 		);
 
-		const relSize = toPathTextItem(relItem, relState).length;
-		const absSize = toPathTextItem(item, state).length;
+		const relSize = toPathTextItem(relItem, relState, fractionDigits).length;
+		const absSize = toPathTextItem(item, state, fractionDigits).length;
 
 		if (relSize < absSize) {
 			item.cmd = relItem.cmd;
