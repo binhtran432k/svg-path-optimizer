@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { createPathItems, toPathTextFromPathItems } from "./path-item.js";
+import { createPathItems } from "./path-item.js";
 
 describe("createSvgItems()", () => {
 	test("can create", () => {
@@ -8,9 +8,35 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       0,
       0,
+    ],
+  },
+]
+`);
+	});
+	test("can create move to group", () => {
+		expect(createPathItems("M0 0 1 2")).toMatchInlineSnapshot(`
+[
+  {
+    "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
+    "values": [
+      0,
+      0,
+    ],
+  },
+  {
+    "cmd": "L",
+    "isAbsolute": true,
+    "upperCmd": "L",
+    "values": [
+      1,
+      2,
     ],
   },
 ]
@@ -21,6 +47,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       -1,
       -2,
@@ -34,6 +62,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       0.1,
       -0.2,
@@ -43,14 +73,22 @@ describe("createSvgItems()", () => {
 `);
 	});
 	test("can create untrim", () => {
-		expect(createPathItems("  M0 0  s  ")).toMatchInlineSnapshot(`
+		expect(createPathItems("  M0 0  Z  ")).toMatchInlineSnapshot(`
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       0,
       0,
     ],
+  },
+  {
+    "cmd": "Z",
+    "isAbsolute": true,
+    "upperCmd": "Z",
+    "values": [],
   },
 ]
 `);
@@ -63,6 +101,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       0,
       1,
@@ -70,6 +110,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "m",
+    "isAbsolute": false,
+    "upperCmd": "M",
     "values": [
       10,
       20,
@@ -83,6 +125,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "L",
+    "isAbsolute": true,
+    "upperCmd": "L",
     "values": [
       0,
       1,
@@ -90,6 +134,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "l",
+    "isAbsolute": false,
+    "upperCmd": "L",
     "values": [
       10,
       20,
@@ -103,12 +149,16 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "H",
+    "isAbsolute": true,
+    "upperCmd": "H",
     "values": [
       0,
     ],
   },
   {
     "cmd": "h",
+    "isAbsolute": false,
+    "upperCmd": "H",
     "values": [
       10,
     ],
@@ -121,12 +171,16 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "V",
+    "isAbsolute": true,
+    "upperCmd": "V",
     "values": [
       0,
     ],
   },
   {
     "cmd": "v",
+    "isAbsolute": false,
+    "upperCmd": "V",
     "values": [
       10,
     ],
@@ -139,10 +193,14 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "Z",
+    "isAbsolute": true,
+    "upperCmd": "Z",
     "values": [],
   },
   {
     "cmd": "z",
+    "isAbsolute": false,
+    "upperCmd": "Z",
     "values": [],
   },
 ]
@@ -155,6 +213,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "C",
+    "isAbsolute": true,
+    "upperCmd": "C",
     "values": [
       20,
       20,
@@ -166,6 +226,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "c",
+    "isAbsolute": false,
+    "upperCmd": "C",
     "values": [
       2,
       2,
@@ -183,6 +245,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "S",
+    "isAbsolute": true,
+    "upperCmd": "S",
     "values": [
       40,
       20,
@@ -192,6 +256,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "s",
+    "isAbsolute": false,
+    "upperCmd": "S",
     "values": [
       4,
       2,
@@ -207,6 +273,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "Q",
+    "isAbsolute": true,
+    "upperCmd": "Q",
     "values": [
       20,
       20,
@@ -216,6 +284,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "q",
+    "isAbsolute": false,
+    "upperCmd": "Q",
     "values": [
       2,
       2,
@@ -231,6 +301,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "T",
+    "isAbsolute": true,
+    "upperCmd": "T",
     "values": [
       50,
       10,
@@ -238,6 +310,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "t",
+    "isAbsolute": false,
+    "upperCmd": "T",
     "values": [
       5,
       1,
@@ -253,6 +327,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "A",
+    "isAbsolute": true,
+    "upperCmd": "A",
     "values": [
       45,
       45,
@@ -265,6 +341,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "a",
+    "isAbsolute": false,
+    "upperCmd": "A",
     "values": [
       4.5,
       4.5,
@@ -283,6 +361,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "A",
+    "isAbsolute": true,
+    "upperCmd": "A",
     "values": [
       45,
       45,
@@ -301,13 +381,17 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       0,
       1,
     ],
   },
   {
-    "cmd": "M",
+    "cmd": "L",
+    "isAbsolute": true,
+    "upperCmd": "L",
     "values": [
       0.2,
       0.3,
@@ -323,6 +407,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "A",
+    "isAbsolute": true,
+    "upperCmd": "A",
     "values": [
       1,
       2,
@@ -335,6 +421,8 @@ describe("createSvgItems()", () => {
   },
   {
     "cmd": "A",
+    "isAbsolute": true,
+    "upperCmd": "A",
     "values": [
       8,
       9,
@@ -353,6 +441,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "M",
+    "isAbsolute": true,
+    "upperCmd": "M",
     "values": [
       2,
       0,
@@ -366,6 +456,8 @@ describe("createSvgItems()", () => {
 [
   {
     "cmd": "A",
+    "isAbsolute": true,
+    "upperCmd": "A",
     "values": [
       45,
       45,
@@ -378,47 +470,5 @@ describe("createSvgItems()", () => {
   },
 ]
 `);
-	});
-});
-
-describe("toPathTextFromSvgItems()", () => {
-	test("can convert", () => {
-		expect(toPathTextFromPathItems([{ cmd: "M", values: [0, 0] }])).toBe(
-			"M0 0",
-		);
-	});
-	test("can convert negative", () => {
-		expect(toPathTextFromPathItems([{ cmd: "M", values: [0, -1] }])).toBe(
-			"M0-1",
-		);
-	});
-	test("can convert floating", () => {
-		expect(toPathTextFromPathItems([{ cmd: "M", values: [1, 0.1] }])).toBe(
-			"M1 .1",
-		);
-		expect(toPathTextFromPathItems([{ cmd: "M", values: [0.1, 0.1] }])).toBe(
-			"M.1.1",
-		);
-		expect(
-			toPathTextFromPathItems([
-				{
-					cmd: "M",
-					values: [0.2, 1.1],
-				},
-			]),
-		).toBe("M.2 1.1");
-	});
-	test("can convert command group", () => {
-		expect(
-			toPathTextFromPathItems([
-				{ cmd: "M", values: [1.2, 0.1] },
-				{ cmd: "M", values: [0.3, 0.4] },
-			]),
-		).toBe("M1.2.1.3.4");
-	});
-	test("can convert arc to", () => {
-		expect(
-			toPathTextFromPathItems([{ cmd: "A", values: [1, 2, 3, 0, 0, 6, 7] }]),
-		).toBe("A1 2 3 006 7");
 	});
 });

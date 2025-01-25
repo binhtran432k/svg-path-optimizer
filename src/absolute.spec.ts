@@ -1,45 +1,41 @@
 import { describe, expect, test } from "bun:test";
 
-import { makePathItemToAbsolute, makePathItemToRelative } from "./absolute.js";
-import { createPathItems, toPathTextFromPathItems } from "./path-item.js";
+import { toAbsolute, toRelativeItem } from "./absolute.js";
+import { createPathItems } from "./path-item.js";
+import { toPathText } from "./path-text.js";
 import type { PathPoint } from "./point.js";
 
-describe("makePathItemToAbsolute()", () => {
-	test("can make from relative", () => {
-		testMakePathItemToAbsolute("m0 0", [1, 2], "M1 2");
+describe("toAbsolute()", () => {
+	test("can convert relative", () => {
+		testToAbsolute("M1 2l0 0", "M1 2L1 2");
 	});
 	test("ignore from absolute", () => {
-		testMakePathItemToAbsolute("M0 0", [1, 2], "M0 0");
+		testToAbsolute("M1 2L0 0", "M1 2L0 0");
 	});
 });
 
-describe("makePathItemToRelative()", () => {
-	test("can make from absolute", () => {
-		testMakePathItemToRelative("M0 0", [1, 2], "m-1-2");
+describe("toRelativeItem()", () => {
+	test("can clone from absolute", () => {
+		testToRelativeItem("M0 0", [1, 2], "m-1-2");
 	});
 	test("ignore from relative", () => {
-		testMakePathItemToRelative("m0 0", [1, 2], "m0 0");
+		testToRelativeItem("m0 0", [1, 2], "m0 0");
 	});
 });
 
-function testMakePathItemToAbsolute(
-	text: string,
-	point: PathPoint,
-	expected: string,
-) {
-	const [item] = createPathItems(text);
-	const upperCmd = item.cmd.toUpperCase();
-	makePathItemToAbsolute(item, upperCmd, item.cmd === upperCmd, point);
-	expect(toPathTextFromPathItems([item])).toBe(expected);
+function testToAbsolute(text: string, expected: string) {
+	const absItems = toAbsolute(createPathItems(text));
+	for (const item of absItems) {
+		expect(item.cmd).toBe(item.upperCmd);
+		expect(item.isAbsolute).toBeTrue();
+	}
+	expect(toPathText(absItems)).toBe(expected);
 }
 
-function testMakePathItemToRelative(
-	text: string,
-	point: PathPoint,
-	expected: string,
-) {
-	const [item] = createPathItems(text);
-	const upperCmd = item.cmd.toUpperCase();
-	makePathItemToRelative(item, upperCmd, item.cmd === upperCmd, point);
-	expect(toPathTextFromPathItems([item])).toBe(expected);
+function testToRelativeItem(text: string, point: PathPoint, expected: string) {
+	let [item] = createPathItems(text);
+	item = toRelativeItem(item, point);
+	expect(item.cmd).not.toBe(item.upperCmd);
+	expect(item.isAbsolute).toBeFalse();
+	expect(toPathText([item])).toBe(expected);
 }

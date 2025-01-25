@@ -1,9 +1,11 @@
+import type { PathItem } from "./path-item.js";
+
 export function translateDiff(
-	upperCmd: string,
-	values: number[],
+	item: PathItem,
 	dx: number,
 	dy: number,
-): void {
+): PathItem {
+	const { upperCmd, values } = item;
 	switch (upperCmd) {
 		case "H":
 			values[0] += dx;
@@ -23,4 +25,5 @@ export function translateDiff(
 				values[i++] += dy;
 			}
 	}
+	return item;
 }

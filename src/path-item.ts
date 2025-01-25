@@ -1,6 +1,8 @@
 export interface PathItem {
 	cmd: string;
 	values: number[];
+	upperCmd: string;
+	isAbsolute: boolean;
 }
 
 const SvgPathSizeMap: Map<string, number> = new Map(
@@ -32,51 +34,6 @@ export function createPathItems(pathText: string): PathItem[] {
 	return splitPathText(pathText).flatMap(parsePathItems);
 }
 
-export function toPathTextFromPathItems(items: PathItem[]): string {
-	let rt = "";
-	let preCmd = "0";
-	let preIsFloating = false;
-	for (const { cmd, values } of items) {
-		if (cmd !== preCmd) {
-			rt += cmd;
-		}
-		const upperCmd = cmd.toUpperCase();
-		// biome-ignore lint/style/noNonNullAssertion: cmd is valid from SvgPaths by default
-		const size = SvgPathSizeMap.get(upperCmd)!;
-		for (let i = 0; i < size; i++) {
-			const v = values[i];
-			const isFirstCmdGroupIdx = i === 0 && preCmd !== cmd;
-			const isNearZero = -1 < v && v < 1 && v !== 0;
-			if (i === 3 && upperCmd === "A") {
-				const flag2V = values[i + 1];
-				rt += ` ${v}${flag2V}`;
-				const postFlagV = values[i + 2];
-				const isPostFlagNearZero =
-					-1 < postFlagV && postFlagV < 1 && postFlagV !== 0;
-				if (isPostFlagNearZero) {
-					rt += postFlagV.toString().replace("0.", ".");
-				} else {
-					rt += postFlagV.toString();
-				}
-				i += 2;
-				preIsFloating = Math.trunc(postFlagV) !== postFlagV;
-				continue;
-			}
-			if (isNearZero) {
-				if (!preIsFloating && !isFirstCmdGroupIdx) rt += " ";
-				rt += v.toString().replace("0.", ".");
-			} else if (v < 0 || isFirstCmdGroupIdx) {
-				rt += v.toString();
-			} else {
-				rt += ` ${v.toString()}`;
-			}
-			preIsFloating = Math.trunc(v) !== v;
-		}
-		preCmd = cmd;
-	}
-	return rt;
-}
-
 function splitPathText(pathText: string): string[] {
 	return pathText
 		.trim()
@@ -85,8 +42,6 @@ function splitPathText(pathText: string): string[] {
 }
 
 function parsePathItems(pathItemsText: string): PathItem[] {
-	const rt: PathItem[] = [];
-
 	const cmd = pathItemsText[0];
 	const upperCmd = cmd.toUpperCase();
 
@@ -100,7 +55,7 @@ function parsePathItems(pathItemsText: string): PathItem[] {
 		.filter(Boolean);
 
 	const count =
-		sizePerCmd === 0 ? 1 : Math.ceil(valueTexts.length / sizePerCmd);
+		sizePerCmd === 0 ? 0 : Math.ceil(valueTexts.length / sizePerCmd);
 
 	const allValueTexts: string[] = new Array(sizePerCmd * count);
 	for (let i = 0, vI = 0; i < allValueTexts.length; ) {
@@ -130,12 +85,25 @@ function parsePathItems(pathItemsText: string): PathItem[] {
 			allValueTexts[i++] = valueTexts[vI++] ?? "0";
 		}
 	}
-	for (let i = 0; i < count; i++) {
-		rt.push({
+
+	const rt: PathItem[] = [
+		{
 			cmd,
+			values: allValueTexts.slice(0, sizePerCmd).map(Number),
+			upperCmd,
+			isAbsolute: cmd === upperCmd,
+		},
+	];
+	const groupCmd = cmd === "m" ? "l" : cmd === "M" ? "L" : cmd;
+	for (let i = 1; i < count; i++) {
+		const upperGroupCmd = groupCmd.toUpperCase();
+		rt.push({
+			cmd: groupCmd,
 			values: allValueTexts
 				.slice(sizePerCmd * i, sizePerCmd * (i + 1))
 				.map(Number),
+			upperCmd: upperGroupCmd,
+			isAbsolute: groupCmd === upperGroupCmd,
 		});
 	}
 	return rt;

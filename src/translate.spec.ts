@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { createPathItems, toPathTextFromPathItems } from "./path-item.js";
+import { createPathItems } from "./path-item.js";
+import { toPathText } from "./path-text.js";
 import { translateDiff } from "./translate.js";
 
 function testTranslate(text: string, dx: number, dy: number, expected: string) {
 	const [item] = createPathItems(text);
-	translateDiff(item.cmd.toUpperCase(), item.values, dx, dy);
-	expect(toPathTextFromPathItems([item])).toBe(expected);
+	expect(toPathText([translateDiff(item, dx, dy)])).toBe(expected);
 }
 
 describe("translateDiff()", () => {

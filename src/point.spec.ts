@@ -1,32 +1,31 @@
 import { describe, test, expect } from "bun:test";
-import { makeToNextPoint, type PathPoint } from "./point";
+import { toNextPoint, type PathPoint } from "./point";
 import { createPathItems } from "./path-item";
 
-describe("makeToNextPoint()", () => {
+describe("toNextPoint()", () => {
 	test("can make absolute", () => {
-		testMakeToNextPoint("M2 3", [1, 2], [2, 3]);
+		testToNextPoint("M2 3", [1, 2], [2, 3]);
 	});
 	test("can make relative", () => {
-		testMakeToNextPoint("m2 3", [1, 2], [3, 5]);
+		testToNextPoint("m2 3", [1, 2], [3, 5]);
 	});
 	test("can make horizontal", () => {
-		testMakeToNextPoint("H3", [1, 2], [3, 2]);
+		testToNextPoint("H3", [1, 2], [3, 2]);
 	});
 	test("can make vertical", () => {
-		testMakeToNextPoint("V4", [1, 2], [1, 4]);
+		testToNextPoint("V4", [1, 2], [1, 4]);
 	});
 	test("ignore close path", () => {
-		testMakeToNextPoint("Z", [1, 2], [1, 2]);
+		testToNextPoint("Z", [1, 2], [1, 2]);
 	});
 });
 
-function testMakeToNextPoint(
+function testToNextPoint(
 	text: string,
 	point: PathPoint,
 	expectedPoint: PathPoint,
 ) {
 	const [item] = createPathItems(text);
-	const upperCmd = item.cmd.toUpperCase();
-	makeToNextPoint(upperCmd, item.values, item.cmd === upperCmd, point);
+	toNextPoint(point, point, item);
 	expect(point).toEqual(expectedPoint);
 }
