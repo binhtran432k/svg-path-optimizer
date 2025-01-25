@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import { toNextPoint, type PathPoint } from "./point";
+import { describe, expect, test } from "bun:test";
 import { createPathItems } from "./path-item";
+import { type PathPoint, toNextPoint } from "./point";
 
 describe("toNextPoint()", () => {
 	test("can make absolute", () => {

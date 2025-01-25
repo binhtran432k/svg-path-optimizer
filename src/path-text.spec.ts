@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { toPathText } from "./path-text.js";
 import { createPathItems } from "./path-item.js";
+import { toPathText } from "./path-text.js";
 
 describe("toPathText()", () => {
 	test("can convert", () => {
